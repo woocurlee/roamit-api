@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: roamit-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: roamit
+      POSTGRES_PASSWORD: roamit
+      POSTGRES_DB: roamit
+    ports:
+      - "5432:5432"
+    volumes:
+      - roamit_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U roamit -d roamit"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  roamit_pgdata:

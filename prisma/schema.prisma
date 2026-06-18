@@ -1,0 +1,125 @@
+// Roamit API Prisma schema
+// 설계 근거: docs/DATABASE.md
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// 사용자 / 인증
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  nickname     String
+  avatarUrl    String?
+  accounts     Account[]
+  sessions     Session[]
+  explorations Exploration[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+/// OAuth 연결 계정 (구글). 한 유저가 여러 provider 연결 가능.
+model Account {
+  id                String   @id @default(uuid())
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String
+  provider          String // "google"
+  providerAccountId String // google sub
+  createdAt         DateTime @default(now())
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+/// refresh token 저장(해시) + 회전/무효화 관리. access token은 stateless라 저장 안 함.
+model Session {
+  id        String    @id @default(uuid())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// 지하철 마스터 데이터
+// ---------------------------------------------------------------------------
+
+model Line {
+  id       String        @id
+  name     String
+  color    String
+  stations StationLine[]
+}
+
+model Station {
+  id           String        @id
+  name         String
+  lines        StationLine[]
+  explorations Exploration[]
+}
+
+/// 역↔노선 N:M 조인. order=0 이 대표 노선.
+model StationLine {
+  station   Station @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  stationId String
+  line      Line    @relation(fields: [lineId], references: [id], onDelete: Cascade)
+  lineId    String
+  order     Int     @default(0)
+
+  @@id([stationId, lineId])
+}
+
+// ---------------------------------------------------------------------------
+// 탐험 / 리뷰
+// ---------------------------------------------------------------------------
+
+/// 단일 역 방문 스냅샷. stationName/lineName/lineColor 는 기록 시점 값 복사.
+model Exploration {
+  id          String        @id @default(uuid())
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  station     Station       @relation(fields: [stationId], references: [id])
+  stationId   String
+  stationName String // snapshot
+  lineName    String // snapshot
+  lineColor   String // snapshot
+  summaryMemo String?
+  photos      String[]
+  visitedAt   DateTime
+  places      PlaceReview[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([userId, visitedAt(sort: Desc)])
+  @@index([userId, stationId])
+}
+
+/// 탐험 내 방문 장소 리뷰. rating 1~5 (검증은 DTO + 마이그레이션 CHECK).
+model PlaceReview {
+  id            String      @id @default(uuid())
+  exploration   Exploration @relation(fields: [explorationId], references: [id], onDelete: Cascade)
+  explorationId String
+  name          String
+  type          String
+  typeLabel     String
+  memo          String?
+  rating        Int
+  photos        String[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([explorationId])
+}
