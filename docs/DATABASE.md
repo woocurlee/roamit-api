@@ -78,8 +78,10 @@ User 1───* Exploration 1───* PlaceReview
 | id | text (PK) | 예: `"line-2"` (lineId) |
 | name | text | 예: `"2호선"` |
 | color | text | hex, 예: `"#00A84D"` |
+| priority | int | 대표 노선 우선순위(작을수록 대표). 노선 번호 사용(2호선=2). |
 
 > 시드 데이터로 채우는 정적 마스터. 서울 1~9호선 + 분당/신분당 등.
+> **대표 노선 결정은 노선이 보유한 `priority`로 한다** — 환승역의 대표 노선 = 그 역이 속한 노선들 중 `priority` 최소값. (역별 코드 레벨 결정이 아니라 데이터로 일관)
 
 ### 3.3 `Station` — 역 (마스터 데이터)
 | 컬럼 | 타입 | 비고 |
@@ -94,9 +96,9 @@ User 1───* Exploration 1───* PlaceReview
 |---|---|---|
 | stationId | text (FK→Station) | |
 | lineId | text (FK→Line) | |
-| order | int | 대표 노선 결정용 정렬 (0이 대표). CLAUDE.md "lines 중 첫 번째" |
 
-> PK = (stationId, lineId) 복합. `order`로 "대표 노선(첫 번째)"을 명시적으로 정한다.
+> PK = (stationId, lineId) 복합.
+> 역의 `lines` 정렬 및 대표 노선(첫 번째)은 조인 시 `Line.priority` 오름차순으로 결정한다 (조인 테이블에 순서 컬럼을 두지 않음).
 
 ### 3.5 `Exploration` — 탐험 (단일 역 방문 스냅샷)
 | 컬럼 | 타입 | 비고 |
@@ -196,6 +198,7 @@ model Line {
   id       String        @id
   name     String
   color    String
+  priority Int // 작을수록 대표 노선
   stations StationLine[]
 }
 
@@ -211,7 +214,6 @@ model StationLine {
   stationId String
   line      Line    @relation(fields: [lineId], references: [id])
   lineId    String
-  order     Int     @default(0)
 
   @@id([stationId, lineId])
 }
@@ -282,7 +284,7 @@ model PlaceReview {
 - `GET /explorations/:id` — 상세 (places 포함)
 - `POST /explorations/:id/places` — 리뷰 추가 (CLAUDE.md 핵심 플로우)
 
-> 응답 DTO는 프론트 타입과 정렬: `Station.lines`는 `StationLine`을 `order` 순으로 매핑, `Exploration`은 스냅샷 필드 그대로 노출.
+> 응답 DTO는 프론트 타입과 정렬: `Station.lines`는 `Line.priority` 오름차순으로 매핑(첫 번째가 대표 노선), `Exploration`은 스냅샷 필드 그대로 노출.
 
 ---
 

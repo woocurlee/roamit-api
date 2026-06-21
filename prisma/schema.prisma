@@ -61,6 +61,7 @@ model Line {
   id       String        @id
   name     String
   color    String
+  priority Int // 작을수록 대표 노선 (역의 대표 노선 = 속한 노선 중 priority 최소)
   stations StationLine[]
 }
 
@@ -71,13 +72,12 @@ model Station {
   explorations Exploration[]
 }
 
-/// 역↔노선 N:M 조인. order=0 이 대표 노선.
+/// 역↔노선 N:M 조인. 대표 노선은 Line.priority 로 파생.
 model StationLine {
   station   Station @relation(fields: [stationId], references: [id], onDelete: Cascade)
   stationId String
   line      Line    @relation(fields: [lineId], references: [id], onDelete: Cascade)
   lineId    String
-  order     Int     @default(0)
 
   @@id([stationId, lineId])
 }
