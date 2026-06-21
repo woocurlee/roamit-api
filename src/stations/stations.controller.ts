@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { StationsService } from './stations.service';
-import { StationResponseDto } from './dto/station-response.dto';
+import { type StationResponseDto } from './dto/station-response.dto';
 
 @Controller('stations')
 export class StationsController {

@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { StationResponseDto } from './dto/station-response.dto';
+import { type StationResponseDto } from './dto/station-response.dto';
 
 /** station + lines(line 포함) 조인 결과 타입 */
-type StationWithLines = {
+interface StationWithLines {
   id: string;
   name: string;
   lines: {
     line: { id: string; name: string; color: string; priority: number };
   }[];
-};
+}
 
 @Injectable()
 export class StationsService {
