@@ -1,73 +1,74 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Roamit API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+[Roamit](../roamit) — 모바일 우선 서울 지하철 탐험 앱 — 의 백엔드 API.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+- **프레임워크**: NestJS
+- **ORM / DB**: Prisma + PostgreSQL
+- **인증**: 구글 OAuth → 자체 JWT (access stateless + refresh 저장/회전)
 
-## Description
+설계 문서: [`docs/DATABASE.md`](docs/DATABASE.md) — DB 스키마, 도메인 모델, 인증 플로우, API 윤곽.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 모노레포 구조
 
-## Installation
-
-```bash
-$ npm install
+```
+workspace/roamit/
+├── roamit/      # 프론트엔드 (Next.js)
+└── roamit-api/  # 백엔드 (이 레포)
 ```
 
-## Running the app
+## 요구 사항
+
+- Node.js 20+
+- Docker (로컬 dev DB)
+
+## 시작하기
 
 ```bash
-# development
-$ npm run start
+# 1. 의존성 설치
+npm install
 
-# watch mode
-$ npm run start:dev
+# 2. 환경변수 설정
+cp .env.example .env   # 값 채우기 (구글 OAuth, JWT 시크릿 등)
 
-# production mode
-$ npm run start:prod
+# 3. 로컬 DB 기동 (PostgreSQL on Docker)
+docker compose up -d
+
+# 4. DB 마이그레이션 적용 + Prisma Client 생성
+npx prisma migrate dev
+
+# 5. 개발 서버 실행
+npm run start:dev
 ```
 
-## Test
+## 주요 스크립트
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run start:dev      # 개발 (watch)
+npm run start:prod     # 프로덕션
+npm run build          # 빌드
+npm run test           # 단위 테스트
+npm run test:e2e       # e2e 테스트
 ```
 
-## Support
+## 데이터베이스
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+docker compose up -d              # DB 컨테이너 시작
+docker compose down               # DB 컨테이너 중지
+npx prisma migrate dev            # 마이그레이션 생성/적용
+npx prisma studio                 # DB GUI
+```
 
-## Stay in touch
+> Prisma 7 참고
+> - DB 접속 URL은 `schema.prisma`가 아니라 **`prisma.config.ts`** (`env.DATABASE_URL`)에서 관리됩니다.
+> - 생성된 Prisma Client는 **`generated/prisma`** 에 위치합니다 (import 경로 주의).
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## 데이터 모델
 
-## License
+| 영역 | 모델 |
+|---|---|
+| 사용자/인증 | `User`, `Account`, `Session` |
+| 지하철 마스터 | `Line`, `Station`, `StationLine` |
+| 탐험/리뷰 | `Exploration`, `PlaceReview` |
 
-Nest is [MIT licensed](LICENSE).
+자세한 내용은 [`docs/DATABASE.md`](docs/DATABASE.md) 참고.
