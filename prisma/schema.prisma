@@ -59,15 +59,17 @@ model Session {
 
 model Line {
   id       String        @id
-  name     String
+  name     String // 한글명 (예: "2호선")
+  nameEn   String // 영문명 (예: "Line 2")
   color    String
   priority Int // 작을수록 대표 노선 (역의 대표 노선 = 속한 노선 중 priority 최소)
   stations StationLine[]
 }
 
 model Station {
-  id           String        @id
-  name         String
+  id           String        @id // 영문 slug (예: "gangnam"). 환승역은 동일 slug 로 dedup.
+  name         String // 한글명 (예: "강남")
+  nameEn       String // 영문명 (예: "Gangnam")
   lines        StationLine[]
   explorations Exploration[]
 }

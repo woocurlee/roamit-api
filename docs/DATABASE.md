@@ -76,7 +76,8 @@ User 1───* Exploration 1───* PlaceReview
 | 컬럼 | 타입 | 비고 |
 |---|---|---|
 | id | text (PK) | 예: `"line-2"` (lineId) |
-| name | text | 예: `"2호선"` |
+| name | text | 한글명, 예: `"2호선"` |
+| nameEn | text | 영문명, 예: `"Line 2"` |
 | color | text | hex, 예: `"#00A84D"` |
 | priority | int | 대표 노선 우선순위(작을수록 대표). 노선 번호 사용(2호선=2). |
 
@@ -86,10 +87,12 @@ User 1───* Exploration 1───* PlaceReview
 ### 3.3 `Station` — 역 (마스터 데이터)
 | 컬럼 | 타입 | 비고 |
 |---|---|---|
-| id | text (PK) | |
-| name | text | 역명 |
+| id | text (PK) | 영문 slug, 예: `"gangnam"`. 환승역은 동일 slug 로 dedup |
+| name | text | 한글 역명, 예: `"강남"` |
+| nameEn | text | 영문 역명, 예: `"Gangnam"` |
 
 > `lines`와 `visited`는 컬럼 아님 → `lines`는 `StationLine` 조인으로, `visited`는 유저별 파생값으로 제공.
+> **`id` 는 영문 slug** — 한글 PK의 URL 인코딩/가독성 문제를 피하고, 환승역(교대·을지로3가 등)은 동일 slug 라 시드 upsert 시 자동 dedup 된다.
 
 ### 3.4 `StationLine` — 역↔노선 조인 (환승역 표현)
 | 컬럼 | 타입 | 비고 |
@@ -196,15 +199,17 @@ model Account {
 
 model Line {
   id       String        @id
-  name     String
+  name     String // 한글명 (예: "2호선")
+  nameEn   String // 영문명 (예: "Line 2")
   color    String
   priority Int // 작을수록 대표 노선
   stations StationLine[]
 }
 
 model Station {
-  id           String        @id
-  name         String
+  id           String        @id // 영문 slug (예: "gangnam")
+  name         String // 한글명 (예: "강남")
+  nameEn       String // 영문명 (예: "Gangnam")
   lines        StationLine[]
   explorations Exploration[]
 }

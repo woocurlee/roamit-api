@@ -9,19 +9,25 @@ export class StationLineDto {
   @ApiProperty({ example: 'line-2', description: '노선 ID' })
   lineId!: string;
 
-  @ApiProperty({ example: '2호선', description: '노선 이름' })
+  @ApiProperty({ example: '2호선', description: '노선 한글명' })
   lineName!: string;
+
+  @ApiProperty({ example: 'Line 2', description: '노선 영문명' })
+  lineNameEn!: string;
 
   @ApiProperty({ example: '#00A84D', description: '노선 색상(hex)' })
   lineColor!: string;
 }
 
 export class StationResponseDto {
-  @ApiProperty({ example: '교대', description: '역 ID(역명)' })
+  @ApiProperty({ example: 'gangnam', description: '역 ID(영문 slug)' })
   id!: string;
 
-  @ApiProperty({ example: '교대', description: '역 이름' })
+  @ApiProperty({ example: '강남', description: '역 한글명' })
   name!: string;
+
+  @ApiProperty({ example: 'Gangnam', description: '역 영문명' })
+  nameEn!: string;
 
   @ApiProperty({
     type: [StationLineDto],

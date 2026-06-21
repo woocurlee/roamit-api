@@ -6,8 +6,15 @@ import { type StationResponseDto } from './dto/station-response.dto';
 interface StationWithLines {
   id: string;
   name: string;
+  nameEn: string;
   lines: {
-    line: { id: string; name: string; color: string; priority: number };
+    line: {
+      id: string;
+      name: string;
+      nameEn: string;
+      color: string;
+      priority: number;
+    };
   }[];
 }
 
@@ -46,8 +53,14 @@ export class StationsService {
       .map((sl) => ({
         lineId: sl.line.id,
         lineName: sl.line.name,
+        lineNameEn: sl.line.nameEn,
         lineColor: sl.line.color,
       }));
-    return { id: station.id, name: station.name, lines };
+    return {
+      id: station.id,
+      name: station.name,
+      nameEn: station.nameEn,
+      lines,
+    };
   }
 }

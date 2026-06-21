@@ -12,21 +12,33 @@ const prismaMock = {
 };
 
 /** 교대(2·3호선 환승) 조인 결과 — 일부러 priority 역순으로 넣어 정렬 검증. */
+const line2 = {
+  id: 'line-2',
+  name: '2호선',
+  nameEn: 'Line 2',
+  color: '#00A84D',
+  priority: 2,
+};
+const line3 = {
+  id: 'line-3',
+  name: '3호선',
+  nameEn: 'Line 3',
+  color: '#EF7C1C',
+  priority: 3,
+};
+
 const gyodaeRaw = {
-  id: '교대',
+  id: 'seoul-nat-univ-of-education',
   name: '교대',
-  lines: [
-    { line: { id: 'line-3', name: '3호선', color: '#EF7C1C', priority: 3 } },
-    { line: { id: 'line-2', name: '2호선', color: '#00A84D', priority: 2 } },
-  ],
+  nameEn: "Seoul Nat'l Univ. of Education",
+  lines: [{ line: line3 }, { line: line2 }],
 };
 
 const sillimRaw = {
-  id: '신림',
+  id: 'sillim',
   name: '신림',
-  lines: [
-    { line: { id: 'line-2', name: '2호선', color: '#00A84D', priority: 2 } },
-  ],
+  nameEn: 'Sillim',
+  lines: [{ line: line2 }],
 };
 
 describe('StationsService', () => {
@@ -57,11 +69,22 @@ describe('StationsService', () => {
       expect(result).toHaveLength(2);
       // 교대: 대표 노선은 priority 2(2호선)가 첫 번째여야 한다.
       expect(result[0]).toEqual({
-        id: '교대',
+        id: 'seoul-nat-univ-of-education',
         name: '교대',
+        nameEn: "Seoul Nat'l Univ. of Education",
         lines: [
-          { lineId: 'line-2', lineName: '2호선', lineColor: '#00A84D' },
-          { lineId: 'line-3', lineName: '3호선', lineColor: '#EF7C1C' },
+          {
+            lineId: 'line-2',
+            lineName: '2호선',
+            lineNameEn: 'Line 2',
+            lineColor: '#00A84D',
+          },
+          {
+            lineId: 'line-3',
+            lineName: '3호선',
+            lineNameEn: 'Line 3',
+            lineColor: '#EF7C1C',
+          },
         ],
       });
       expect(result[1].lines).toHaveLength(1);
@@ -80,7 +103,7 @@ describe('StationsService', () => {
 
       const result = await service.getRandom();
 
-      expect(result.id).toBe('교대');
+      expect(result.id).toBe('seoul-nat-univ-of-education');
       expect(result.lines[0].lineId).toBe('line-2');
       // count 기반 skip 으로 단건 조회했는지 검증
       expect(prismaMock.station.findMany).toHaveBeenCalledWith(
