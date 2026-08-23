@@ -1,9 +1,14 @@
 import { NestFactory } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { createCorsOptions } from './config/cors.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // CORS_ORIGIN(허용 origin 목록) / CORS_CREDENTIALS 환경변수로 정책 관리
+  app.enableCors(createCorsOptions(app.get(ConfigService)));
 
   // Swagger(OpenAPI) 문서 — http://localhost:3000/api-docs
   const config = new DocumentBuilder()

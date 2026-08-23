@@ -40,6 +40,24 @@ npx prisma migrate dev
 npm run start:dev
 ```
 
+## 로컬 개발 주소 & CORS
+
+| 서비스 | 주소 |
+|---|---|
+| 백엔드 (roamit-api) | http://localhost:3000 |
+| 프론트엔드 (roamit) | http://localhost:3001 |
+
+프론트엔드 기본 포트(3000)는 백엔드와 겹치므로, roamit 저장소에서는 `npm run dev`(내부적으로 `next dev -p 3001`)로 3001 포트를 사용합니다.
+
+백엔드는 `CORS_ORIGIN` 환경변수에 등록된 origin만 허용하고(`.env.example` 기본값: `http://localhost:3001`), 목록에 없는 origin의 요청은 차단합니다. 쿠키 등 credentials 를 포함한 요청을 허용하려면 `CORS_CREDENTIALS=true`로 설정하세요. 배포 환경에서는 실제 프론트엔드 도메인으로 `CORS_ORIGIN`을 교체합니다.
+
+roamit 프론트엔드에서 이 API를 호출하려면 `.env.local`에 다음과 같이 설정합니다.
+
+```bash
+# roamit/.env.local
+NEXT_PUBLIC_API_URL="http://localhost:3000"
+```
+
 ## 주요 스크립트
 
 ```bash
