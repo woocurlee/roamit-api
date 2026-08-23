@@ -2,7 +2,16 @@
 
 > 이 문서는 **DB 스키마**를 1차 기준으로 백엔드 도메인 모델과 API 윤곽을 정의한다.
 > 프론트엔드(`roamit`)의 `CLAUDE.md` 데이터 모델(Station / Exploration / PlaceReview)을 백엔드 정본 스키마로 정규화한 것이다.
-> 코드(Prisma migration, Nest 모듈)는 이 문서 합의 후 생성한다.
+> 구현 기준은 **NestJS + Prisma 7 + PostgreSQL**이며, 스키마 변경은 Prisma Migration으로 관리한다.
+
+### 1.1 기술 구성
+
+- **애플리케이션**: NestJS 도메인 모듈 구조
+- **DB 접근**: 전역 `PrismaModule` / `PrismaService`
+- **ORM / 드라이버**: Prisma 7 + `@prisma/adapter-pg`
+- **데이터베이스**: PostgreSQL (로컬 개발은 Docker Compose)
+- **설정**: `DATABASE_URL`은 `prisma.config.ts`에서 로드
+- **생성 코드**: Prisma Client는 `generated/prisma`에 생성
 
 ---
 
@@ -148,16 +157,19 @@ User 1───* Exploration 1───* PlaceReview
 
 ---
 
-## 5. Prisma 스키마 (초안)
+## 5. Prisma 스키마
+
+아래는 도메인 모델을 설명하기 위한 핵심 스키마이며, 실행 가능한 정본은
+`prisma/schema.prisma`와 `prisma/migrations`에서 관리한다.
 
 ```prisma
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -341,9 +353,18 @@ DATABASE_URL=
 
 ---
 
-## 10. 다음 단계 (이 문서 합의 후)
+## 10. 구현 현황 및 다음 단계
 
-1. NestJS 프로젝트 스캐폴딩 (`nest new` / pnpm)
-2. Prisma 설치 + 위 스키마로 첫 migration
-3. Line/Station 시드 스크립트 (서울 지하철 데이터)
-4. 모듈 단위 구현: `auth(구글 OAuth)` → `stations` → `explorations`
+### 반영 완료
+
+- NestJS 프로젝트 및 전역 Prisma 모듈
+- PostgreSQL용 초기 Prisma migration
+- 서울 지하철 Line/Station seed와 대표 노선 우선순위
+- `stations` 전체/무작위 조회 모듈 및 테스트
+
+### 다음 단계
+
+1. `auth` — Google OAuth, access/refresh JWT, 세션 회전
+2. `explorations` — 사용자별 탐험 CRUD와 소유권 검증
+3. `places` — 탐험 내 장소 리뷰 생성/수정
+4. `me` — 프로필과 탐험 통계 조회
