@@ -10,7 +10,7 @@ async function bootstrap() {
   // CORS_ORIGIN(허용 origin 목록) / CORS_CREDENTIALS 환경변수로 정책 관리
   app.enableCors(createCorsOptions(app.get(ConfigService)));
 
-  // Swagger(OpenAPI) 문서 — http://localhost:3000/api-docs
+  // Swagger(OpenAPI) 문서 — http://localhost:3001/api-docs
   const config = new DocumentBuilder()
     .setTitle('Roamit API')
     .setDescription('서울 지하철 탐험 앱 Roamit 백엔드 API')
@@ -20,6 +20,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document);
 
-  await app.listen(3000);
+  await app.listen(3001);
 }
 void bootstrap();

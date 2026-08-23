@@ -10,7 +10,7 @@ describe('CORS (e2e)', () => {
 
   beforeAll(async () => {
     // .env 로컬 설정과 무관하게 테스트 값을 강제(dotenv 는 기존 process.env 를 덮어쓰지 않음)
-    process.env.CORS_ORIGIN = 'http://localhost:3001';
+    process.env.CORS_ORIGIN = 'http://localhost:3000';
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -28,10 +28,10 @@ describe('CORS (e2e)', () => {
   it('허용된 origin 요청에는 Access-Control-Allow-Origin 헤더를 포함한다', async () => {
     const res = await request(app.getHttpServer())
       .get('/')
-      .set('Origin', 'http://localhost:3001');
+      .set('Origin', 'http://localhost:3000');
 
     expect(res.headers['access-control-allow-origin']).toBe(
-      'http://localhost:3001',
+      'http://localhost:3000',
     );
   });
 
